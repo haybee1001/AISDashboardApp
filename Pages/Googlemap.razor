@@ -1,0 +1,86 @@
+﻿@page "/googlemap"
+
+@using DashboardApp.Data
+@inject WeatherForecastService ForecastService
+@using GoogleMapsComponents
+@using GoogleMapsComponents.Maps
+@inject IJSRuntime JS
+@inject IModalService Modal
+@*<h3>Google Map @PassedLat</h3>*@
+
+@*<div class="custom-control custom-switch">
+    <input type="checkbox" class="custom-control-input" id="customSwitches" @onchange="toggleCheck">
+    <label class="custom-control-label" for="customSwitches">MapBox </label>
+</div>
+<button id="selfclick" class="btn btn-outline-primary" @onclick="showMoadal">
+</button>*@
+
+<label>
+    @PassedLat
+</label>
+<label>
+    @PassedLng
+</label>
+
+<div id="map" style="height:45vh; width:1150px">
+    <label></label>
+</div>
+
+
+
+@code
+{
+    public string toggle = "True";
+
+    public string lat { get; set; }
+
+    public async Task LoadData()
+    {
+        await JS.InvokeVoidAsync("ShowAlert");
+    }
+
+    public async Task LoadBaseMap()
+    {
+        await JS.InvokeVoidAsync("LoadGoogleBaseMAP", PassedLat, PassedLng);
+    }
+
+    public async Task toggleCheck(ChangeEventArgs e)
+    {
+        toggle = e.Value.ToString();
+
+        if (toggle == "True")
+        {
+            await Task.Run(loadMapbox);
+        }
+        else
+        {
+            await Task.Run(LoadBaseMap);
+        }
+    }
+
+
+    public async Task loadMapbox()
+    {
+        await JS.InvokeVoidAsync("Mapbox", PassedLat, PassedLng);
+    }
+
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    [Parameter] public string PassedLat { get; set; }
+
+    [Parameter] public string PassedLng { get; set; }
+
+    public async Task showMoadal()
+    {
+        await Task.Run(loadMapbox);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // await JS.InvokeVoidAsync("buttonclick");
+    }
+
+}
+
+
+

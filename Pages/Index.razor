@@ -1,0 +1,494 @@
+﻿@page "/"
+@using DashboardApp.Models;
+@inject IJSRuntime jsruntime
+
+
+@*@if (fault_count == null)
+    {
+        <div class="spinner" style="margin-bottom:30px">
+        </div>
+    }
+    else if (loadFailed)
+    {
+        <h3>Sorry, we could not load this product due to an error. Please Refresh page!</h3>
+    }
+    else
+    {
+    @*<div class="container col-md-12" style="float:left">
+        <div class="row bg-faded">
+
+              <div class="col-md-3">
+                    <div class="card text-white bg-info mb-3" style="max-width: 23rem;">
+                        <a href="#" style="text-decoration:none; color:white"><div class="card-header">FAULTS</div></a>
+                        <div class="card-body">
+                            <h1 class="card-title"><span class="" style="font-size:50px;"><i class="fa fa-arrow-up" aria-hidden="true"></i>&nbsp;@fault_count</span></h1>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-info mb-3" style="max-width: 23rem;">
+                        <a href="#" style="text-decoration:none; color:white"><div class="card-header">FAULTS</div></a>
+                        <div class="card-body">
+                            <h1 class="card-title"><span class="" style="font-size:50px;"><i class="fa fa-arrow-up" aria-hidden="true"></i>&nbsp;@fault_count</span></h1>
+                        </div>
+                    </div>
+                </div>
+
+
+            <div class="col-md-3">
+                <div class="card text-white bg-danger mb-3" style="max-width: 23rem;">
+                    <a href="#" style="text-decoration:none; color:white"><div class="card-header">OUTAGE</div></a>
+                        <div class="card-body">
+                            <h1 class="card-title"><span class="" style="font-size:50px;"><i class="fa fa-plug" aria-hidden="true"></i>&nbsp;@outage_count</span></h1>
+                        </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-white bg-warning mb-3" style="max-width: 23rem;">
+                    <a href="#" style="text-decoration:none; color:white"><div class="card-header">COMPLAINTS</div></a>
+                        <div class="card-body">
+                            <h1 class="card-title"><span style="font-size: 50px">60</span></h1>
+                        </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-white bg-success mb-3" style="max-width: 23rem;">
+                    <a href="#" style="text-decoration:none; color:white"><div class="card-header">HAZARDS</div></a>
+                        <div class="card-body">
+                            <h1 class="card-title"><span class="" style="font-size:50px"><i class="fa fa-fire" aria-hidden="true"></i>&nbsp;@hazard_count</span></h1>
+                        </div>
+                </div>
+            </div>
+
+            <div class="w-100"></div>
+
+
+            <div class="col-md-3">
+                <div class="card text-white bg-dark mb-3" style="max-width: 23rem;">
+                    <a href="#" style="text-decoration:none; color:white"><div class="card-header">WHISTLE</div></a>
+                    <div class="card-body">
+                        <h1 class="card-title"><span class="" style="font-size:50px;"><i class="fa fa-bolt" aria-hidden="true"></i>&nbsp;@whistle_count</span></h1>
+                    </div>
+                        </div>
+          </div>
+
+
+            <div class="col-md-3">
+                <div class="card text-white bg-primary mb-3" style="max-width: 23rem;">
+                    <a href="#" style="text-decoration:none; color:white"><div class="card-header">OUTAGE</div></a>
+                        <div class="card-body">
+                            <h1 class="card-title"><span class="oi oi-flash" style="font-size:50px;">&nbsp;@outage_count</span></h1>
+                        </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-white bg-secondary mb-3" style="max-width: 23rem;">
+                    <a href="#" style="text-decoration:none; color:white"><div class="card-header">COMPLAINTS</div></a>
+                        <div class="card-body">
+                            <h1 class="card-title"><span style="font-size: 50px">0</span></h1>
+                        </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="row" style="margin-top:60px">
+
+            <div class="container col-md-12" style="margin-right:0; margin-left:0; text-align:center; margin-bottom:40px">
+                <div class="row" style="margin-bottom:20px">
+                    <div class="col"></div>
+                    <div class="col-6"><span style="font-size:25px">INCIDENCE REPORT SUMMARY</span></div>
+                    <div class="col"></div>
+                </div>
+
+                <div class="row">
+                    <div class="col"></div>
+                    <div class="col-3">
+                        <select id="xxx" class="form-control" name="tosan" style="width: 400px" @onchange="checkSelection">
+                            <option value="">Bar Chart</option>
+                            <option value="">Pie Chart</option>
+                        </select>
+                    </div>
+                    <div class="col"></div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12" style="margin-top:20px; margin-bottom:0px">
+                        <button id="selfclick" class="btn btn-dark" @onclick="loadjsChart">Refresh</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-12" style="">
+                <h3>Report Session.......... </h3>
+            </div>
+
+            <div class="col-md-3" style="">
+
+            </div>
+            <div class="col-md-6" style="">
+                <style @onload="self">
+                    #chartdiv {
+                        width: 90%;
+                        height: 400px;
+                    }
+                </style>
+                <div id="chartdiv"></div>
+            </div>
+            <div class="col-md-3" style="">
+
+            </div>
+
+            <div class="col-md-6">
+                <div class="card text-white bg-danger mb-3" style="max-width: 23rem;">
+                    <div class="card-header">OUTAGE</div>
+                    <div class="card-body">
+                        <h1 class="card-title"><span class="" style="font-size:50px;"><i class="fa fa-plug" aria-hidden="true"></i>&nbsp;</span></h1>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>*@
+@*@if (fault_count == null)
+{
+    <div class="spinner" style="margin-top:400px;  margin-left:-100px"></div>
+}
+else
+{*@
+    <div id="layoutSidenav_content">
+        <main>
+            <div class="container-fluid">
+                <h1 class="mt-4">Dashboard</h1>
+                <ol class="breadcrumb mb-4">
+                    <li class="breadcrumb-item active">Dashboard</li>
+                </ol>
+
+                <!-- START CONTENTS -->
+                <div class="row container-fluid">
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card bg-primary text-white mb-4">
+                            <div class="card-body">
+                                <i class="fa fa-arrow-up fa-2x mr-1"
+                                   aria-hidden="true"></i> Faults
+                            </div>
+                            <span class=" text-numbers"
+                                  style="font-size: 3rem;">@fault_count</span>
+                                <div class="card-footer d-flex align-items-center justify-content-between">
+                                    <a class="small text-white stretched-link"
+                                       href="#">View Details</a>
+                                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="card bg-warning text-white mb-4">
+                                <div class="card-body">
+                                    <i class="fa fa-bolt fa-2x mr-1"
+                                       aria-hidden="true"></i> Outtage
+                                </div>
+                                <span class=" text-numbers"
+                                      style="font-size: 3rem;">@outage_count</span>
+                                    <div class="card-footer d-flex align-items-center justify-content-between">
+                                        <a class="small text-white stretched-link"
+                                           href="#">View Details</a>
+                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-md-6">
+                                <div class="card bg-secondary text-white mb-4">
+                                    <div class="card-body">
+                                        <i class="fa fa-plug fa-2x mr-1"
+                                           aria-hidden="true"></i> Complaints
+                                    </div>
+                                    <span class=" text-numbers"
+                                          style="font-size: 3rem;">@complaint_count</span>
+                                        <div class="card-footer d-flex align-items-center justify-content-between">
+                                            <a class="small text-white stretched-link"
+                                               href="#">View Details</a>
+                                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-3 col-md-6">
+                                    <div class="card bg-danger  text-white mb-4">
+                                        <div class="card-body">
+                                            <i class="fa fa-bolt fa-2x mr-1"
+                                               aria-hidden="true"></i> Hazard
+                                        </div>
+                                        <span class="text-numbers"
+                                              style="font-size: 3rem;">@hazard_count</span>
+                                            <div class="card-footer d-flex align-items-center justify-content-between">
+                                                <a class="small text-white stretched-link"
+                                                   href="#">View Details</a>
+                                                <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-3 col-md-6">
+                                        <div class="card bg-success  text-white mb-4">
+                                            <div class="card-body">
+                                                <i class="fa fa-paper-plane fa-2x mr-1"
+                                                   aria-hidden="true"></i> Whistle
+                                            </div>
+                                            <span class=" text-white text-numbers"
+                                                  style="font-size: 3rem;">@whistle_count</span>
+                                                <div class="card-footer d-flex align-items-center justify-content-between">
+                                                    <a class="small text-white stretched-link"
+                                                       href="#">View Details</a>
+                                                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+
+                                        <div class="col-xl-6">
+                                            <div class="card mb-4">
+                                                <div class="card-header">
+                                                    <i class="fas fa-chart-area mr-1"></i>
+                                                    Area Chart
+                                                </div>
+                                                <div class="card-body">
+                                                    <canvas id="myAreaChart"
+                                                            width="100%"
+                                                            height="40"></canvas>
+                                                    <button id="selfclick" class="btn btn-dark" @onclick="loadjsChart">Refresh</button>
+                                                    <style @onload="self">
+                                                        #chartdiv {
+                                                            width: 90%;
+                                                            height: 400px;
+                                                        }
+                                                    </style>
+                                                    <div id="chartdiv"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-xl-6">
+                                            <div class="card mb-4">
+                                                <div class="card-header">
+                                                    <i class="fas fa-chart-bar mr-1"></i>
+                                                    Bar Chart
+                                                </div>
+                                                <div class="card-body">
+                                                    <canvas id="myBarChart"
+                                                            width="100%"
+                                                            height="40"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-12 col-12 col-md-12"
+                                             id="map">
+                                            <div class="card card-cascade narrower mb-4">
+                                                <div class="card-header">
+                                                    <i class="fas fa-chart-area mr-1"></i>
+                                                    Incident real-time location
+                                                </div>
+                                                <div class="card-body card-body-cascade text-center p-0"
+                                                     style=" height: 49vh;"
+                                                     id="map">
+
+                                                    <div id="map-container-google-9"
+                                                         class=" map-container">
+                                                        <iframe src="https://maps.google.com/maps?q=enugut&t=&z=13&ie=UTF8&iwloc=&output=embed"
+                                                                frameborder="0"
+                                                                style="border:0; height: 50%; width: 100%;"
+                                                                allowfullscreen>
+                                                        </iframe>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card mb-4">
+                                        <div class="card-header">
+                                            <i class="fas fa-table mr-1"></i>
+                                            Incidence
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered"
+                                                       id="dataTable"
+                                                       width="100%"
+                                                       cellspacing="0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>ID</th>
+                                                            <th>Reporter Name</th>
+                                                            <th>Phone Number</th>
+                                                            <th>Category</th>
+                                                            <th>Description</th>
+                                                            <th>CapturedIssueDate</th>
+                                                            <th>Map</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @*@foreach (var data in cstt)
+                                                        {*@
+                                                            @*<tr>
+                                                                <td style="width:50px">@data.IncidenceId.ToUpper()</td>
+                                                                <td style="width:80px">@data.ReporterFullname.ToUpper()</td>
+                                                                <td style="width:50px">@data.ReporterPhoneNo</td>
+                                                                <td style="width:50px">@data.Category.ToUpper()</td>
+                                                                <td style="width:300px">@data.Description.ToUpper()</td>
+                                                                <td style="width:60px">@data.CapturedIssueDate</td>
+                                                                <td style="width:50px">
+                                                                    <button class="btn-danger btn-sm" id="btnDelete" value="delete">View</button>
+                                                                </td>
+                                                            </tr>*@
+
+                                                        <tr>
+                                                            <td>Jane Doe</td>
+                                                            <td>Outage</td>
+                                                            <td>View Map</td>
+                                                            <td>Ogui</td>
+                                                            <td>2012/03/29</td>
+                                                            <td>0232</td>
+                                                            <td>0232</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Jane Doe</td>
+                                                            <td>Outage</td>
+                                                            <td>View Map</td>
+                                                            <td>Ogui</td>
+                                                            <td>2012/03/29</td>
+                                                            <td>0232</td>
+                                                            <td>0232</td>
+                                                        </tr>
+                                                        @*}*@
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </main>
+                            <footer class="py-4 bg-light mt-auto">
+                                <div class="container-fluid">
+                                    <div class="d-flex align-items-center justify-content-between small">
+                                        <div class="text-muted">Copyright &copy; eedc 2020</div>
+                                        <div>
+                                            <a href="#">Privacy Policy</a>
+                                            &middot;
+                                            <a href="#">Terms &amp; Conditions</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </footer>
+                        </div>
+                    @*}*@
+
+@code
+{
+    string fault_count;
+    string hazard_count;
+    string outage_count;
+    string whistle_count;
+    string complaint_count;
+
+    private bool loadFailed;
+
+    public string selectedString = "Bar Chart";
+
+    private IList<IncidenceReports> cstt = null;
+
+    public int PageSize { get; set; }
+    public int totalPages { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Run(LoadReports);
+
+    }
+
+
+    public async Task LoadReports1()
+    {
+        PageSize = 10;
+
+        await using (var context = new eedcgisdbContext())
+        {
+            cstt = context.IncidenceReports.Select(p => new IncidenceReports()
+            {
+                IncidenceId = p.IncidenceId,
+                ReporterFullname = p.ReporterFullname,
+                ReporterPhoneNo = p.ReporterPhoneNo,
+                Category = p.Category,
+                Description = p.Description,
+                CapturedIssueDate = p.CapturedIssueDate,
+                LatY = p.LatY,
+                LongX = p.LongX
+
+            }).ToList();
+        }
+    }
+
+
+    public async Task LoadReports()
+    {
+        //await Task.Run(LoadReports1);
+        // loadFailed = false;
+
+        try
+        {
+
+            await using (var context = new eedcgisdbContext())
+            {
+                fault_count = context.IncidenceReports.Where(p => p.Category == "Fault").Count().ToString();
+                hazard_count = context.IncidenceReports.Where(p => p.Category == "Outage").Count().ToString();
+                outage_count = context.IncidenceReports.Where(p => p.Category == "Hazard").Count().ToString();
+                whistle_count = context.IncidenceReports.Where(p => p.Category == "Whistle").Count().ToString();
+                complaint_count = context.IncidenceReports.Where(p => p.Category == "Complaint").Count().ToString();
+            }
+
+        }
+        catch (Exception ex)
+        {
+            // loadFailed = true;
+        }
+
+    }
+
+
+    public void checkSelection(ChangeEventArgs e)
+    {
+        selectedString = e.Value.ToString();
+    }
+
+    public async Task self()
+    {
+        await jsruntime.InvokeVoidAsync("buttonclick");
+    }
+
+    public async Task loadjsChart()
+    {
+        await Task.Run(LoadReports);
+
+        if (selectedString == "Bar Chart")
+        {
+
+            await jsruntime.InvokeVoidAsync("loadChart", fault_count, outage_count, complaint_count, whistle_count, hazard_count);
+        }
+        else
+        {
+            //await Task.Run(LoadReports);
+            await jsruntime.InvokeVoidAsync("pieChart", fault_count, outage_count, complaint_count, whistle_count, hazard_count);
+        }
+    }
+
+    public async Task showPie()
+    {
+        await jsruntime.InvokeVoidAsync("pieChart", fault_count, outage_count, complaint_count, whistle_count, hazard_count);
+    }
+}
+
+
+

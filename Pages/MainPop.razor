@@ -1,0 +1,77 @@
+﻿@page "/mainpop"
+
+@using DashboardApp.Data
+@inject WeatherForecastService ForecastService
+@inject IModalService Modal
+
+    <div class="container">
+        <div>
+            <br />
+            <button class="btn-info" @onclick="ShowModal">Save</button>
+        </div>
+        <div class="col-12 row">
+            <div>
+                <label>Category</label>
+                <select id="xxx" class="form-control" name="tosan" style="width:200px">
+                    <option value="">-- Select Country --</option>
+                    <option value="">Fault</option>
+                    <option value="">Whistle</option>
+                    <option value="">Outage</option>
+                    <option value="">Complain</option>
+                    <option value="">HazardXX</option>
+                </select>
+            </div>
+
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <div>
+                <br />
+                <br />
+                <br />
+                <br />
+                <label>District</label>
+                <select id="xxx" class="form-control" name="tosan" style="width:200px">
+                    <option value="">-- Select District --</option>
+                    <option value="">OGUI</option>
+                    <option value="">ABAKPA</option>
+                </select>
+            </div>
+
+
+        </div>
+    </div>
+
+@code
+{
+
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    [Parameter] public string Message { get; set; }
+
+    public void SubmitForm()
+    {
+        BlazoredModal.Close();
+    }
+
+    public void PassData()
+    {
+        BlazoredModal.Close();
+    }
+
+
+    string _message = "Hello World";
+
+    public async Task ShowModal()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(Report.PassedLat), _message);
+
+        _ = Modal.Show<Report>("Passing Data", parameters);
+
+        BlazoredModal.Close();
+    }
+
+}

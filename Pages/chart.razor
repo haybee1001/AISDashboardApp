@@ -1,0 +1,76 @@
+﻿@page "/chart"
+@using DashboardApp.Models;
+@inject IJSRuntime jsruntime
+
+<h1>
+    Bar Chart Test
+</h1>
+
+
+<button id="selfclick" class="btn btn-dark" @onclick="loadjsChart">Refresh Chart</button>
+
+@if (fault_count == null)
+{
+    <div>
+        <h1>LOADING DATA</h1>
+    </div>
+}
+else
+{
+    <style @onload="self">
+        #chartdiv {
+            width: 100%;
+            height: 500px;
+        }
+    </style>
+    <div id="chartdiv"></div>
+}
+
+
+
+@code
+{
+    string fault_count;
+    string hazard_count;
+    string outage_count;
+    string whistle_count;
+    string complaint_count;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Run(LoadReports);
+    }
+
+
+    public async Task LoadReports()
+    {
+
+        await using (var context = new eedcgisdbContext())
+        {
+            fault_count = context.IncidenceReports.Where(p => p.Category == "Fault").Count().ToString();
+            hazard_count = context.IncidenceReports.Where(p => p.Category == "Outage").Count().ToString();
+            outage_count = context.IncidenceReports.Where(p => p.Category == "Hazard").Count().ToString();
+            whistle_count = context.IncidenceReports.Where(p => p.Category == "Whistle").Count().ToString();
+            complaint_count = context.IncidenceReports.Where(p => p.Category == "Complaint").Count().ToString();
+
+            await loadjsChart();
+        }
+
+        //Task.Run(loadjsChart);
+
+    }
+
+    public async Task self()
+    {
+        await jsruntime.InvokeVoidAsync("buttonclick");
+    }
+
+    public async Task loadjsChart()
+    {
+        await jsruntime.InvokeVoidAsync("loadChart", fault_count, outage_count, complaint_count, whistle_count, hazard_count);
+    }
+
+}
+
+
+

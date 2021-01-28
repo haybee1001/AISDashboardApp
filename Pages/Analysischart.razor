@@ -1,0 +1,128 @@
+﻿@page "/analysischart"
+@using DashboardApp.Models;
+@inject IJSRuntime jsruntime
+@inject IModalService Modal
+
+
+
+<div class="container col-md-12" style="margin-right:0; margin-left:0; text-align:center; margin-bottom:40px">
+    <div class="row" style="margin-bottom:20px">
+        <div class="col"></div>
+        <div class="col-6"><span style="font-size:25px">INCIDENCE REPORT SUMMARY</span></div>
+        <div class="col"></div>
+    </div>
+
+    <div class="row">
+        <div class="col"></div>
+        <div class="col-3">
+            <select id="xxx" class="form-control" name="tosan" style="width: 400px" @onchange="checkSelection">
+                <option value="">Bar Chart</option>
+                <option value="">Pie Chart</option>
+            </select>
+        </div>
+        <div class="col"></div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12" style="margin-top:20px; margin-bottom:40px">
+            <button id="selfclick" class="btn btn-dark" @onclick="loadjsChart">Refresh</button>
+            <button class="btn"><i class="fa fa-filter" aria-hidden="true" @onclick="ShowModal"></i> Filter by Period </button>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class=" col-lg-12">
+        @if (fault_count == null)
+        {
+            <div class="spinner" style="margin-bottom:30px">
+            </div>
+        }
+        else
+        {
+            <style @onload="self">
+                #chartdiv {
+                    width: 90%;
+                    height: 450px;
+                }
+            </style>
+            <div id="chartdiv"></div>
+        }
+    </div>
+</div>
+
+
+@code
+{
+    string fault_count;
+    string hazard_count;
+    string outage_count;
+    string whistle_count;
+    string complaint_count;
+
+    public string selectedString = "Bar Chart";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Run(LoadReports);
+    }
+
+
+    public async Task LoadReports()
+    {
+
+        await using (var context = new eedcgisdbContext())
+        {
+            fault_count = context.IncidenceReports.Where(p => p.Category == "Fault").Count().ToString();
+            hazard_count = context.IncidenceReports.Where(p => p.Category == "Outage").Count().ToString();
+            outage_count = context.IncidenceReports.Where(p => p.Category == "Hazard").Count().ToString();
+            whistle_count = context.IncidenceReports.Where(p => p.Category == "Whistle").Count().ToString();
+            complaint_count = context.IncidenceReports.Where(p => p.Category == "Complaint").Count().ToString();
+
+            // await loadjsChart();
+        }
+
+        //  await Task.Run(loadjsChart);
+
+    }
+
+    public async Task self()
+    {
+        await jsruntime.InvokeVoidAsync("buttonclick");
+    }
+
+    public async Task loadjsChart()
+    {
+        await Task.Run(LoadReports);
+        if (selectedString == "Bar Chart")
+        {
+
+            await jsruntime.InvokeVoidAsync("loadChart", fault_count, outage_count, complaint_count, whistle_count, hazard_count);
+        }
+        else
+        {
+            //await Task.Run(LoadReports);
+            await jsruntime.InvokeVoidAsync("pieChart", fault_count, outage_count, complaint_count, whistle_count, hazard_count);
+        }
+    }
+
+
+    public void checkSelection(ChangeEventArgs e)
+    {
+        selectedString = e.Value.ToString();
+    }
+
+    public void ShowDisplay()
+    {
+
+    }
+
+    public async Task ShowModal()
+    {
+        var parameters = new ModalParameters();
+
+        _ = Modal.Show<FetchData>("Incidence Map", parameters);
+
+    }
+
+}

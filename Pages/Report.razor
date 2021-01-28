@@ -1,0 +1,351 @@
+﻿@page "/report"
+
+@using DashboardApp.Data
+@using DashboardApp.Models
+@inject WeatherForecastService ForecastService
+@using BlazorPro.Spinkit
+
+@inject IModalService Modal
+
+<div class="container"  style="float:left; margin-left:-10px">
+    <label><h3>Incidence Data</h3></label>
+</div>
+
+<div class="container" style="float:left; margin-bottom:20px; margin-left:-10px">
+    @if (5 < 10)
+    {
+     var pageNumber = 0;
+    <div class="row">
+        <div class="col">
+            <select id="xxx" class="form-control" @onchange="CheckandDo" name="tosan" style="width: 200px">
+                <option value="">-- Choose Category --</option>
+                <option value="">None</option>
+                <option value="">Fault</option>
+                <option value="">Whistle</option>
+                <option value="">Outage</option>
+                <option value="">Complain</option>
+                <option value="">Hazard</option>
+            </select>
+        </div>
+        <div class="col">
+            <select id="xx" class="form-control" @onchange="CheckandDo2" name="tsan" style="width:200px">
+                <option value="">-- Choose District --</option>
+                <option value="">None</option>
+                <option value="">OGUI</option>
+                <option value="">ABAKPA</option>
+                <option value="">EMENE</option>
+            </select>
+        </div>
+        <div class="col">
+            <button class="btn btn-info" @onclick="loadTableInfo"><i class="fa fa-filter" aria-hidden="true"></i></button>
+        </div>
+        <div class="col">
+        </div>
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col"></div>
+    </div>
+    }
+</div>
+
+<div class="col-12 row">
+
+
+    @if (cst == null)
+    {
+        <div class="spinner" style="margin-top:400px;  margin-left:-100px"></div>
+    }
+    else
+    {
+
+        <label style="display:none">@selectedString</label>
+        <label style="display:none">@selectedString2</label>
+        <table class="table">
+            <thead style="background-color:#0094ff; border-top-left-radius:20px 50px">
+                <tr>
+                    <th>ID</th>
+                    <th>Reporter Name</th>
+                    <th>Phone Number</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>CapturedIssueDate</th>
+                    <th>Map</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var data in cst)
+                {
+                    <tr style="font-size:14px">
+                        <td style="width:50px">@data.IncidenceId.ToUpper()</td>
+                        <td style="width:80px">@data.ReporterFullname.ToUpper()</td>
+                        <td style="width:50px">@data.ReporterPhoneNo</td>
+                        <td style="width:50px">@data.Category.ToUpper()</td>
+                        <td style="width:300px">@data.Description.ToUpper()</td>
+                        <td style="width:60px">@data.CapturedIssueDate</td>
+                        <td style="width:50px">
+                            <button class="btn-danger btn-sm" id="btnDelete" value="delete" @onclick="@(e => clicktest(data.LatY.ToString(), data.LongX.ToString()))">View</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+
+    @for (int i = 0; i < totalPages; i++)
+    {
+        // Check to see the selected dropdown data and populate table based on the selected
+        var pageNumber = i;
+
+        <span> &nbsp;&nbsp; <button class="btn @(CurrentPage == pageNumber? "btn-dark" : "btn-info")" @onclick="@(e => Single(pageNumber, selectedString, selectedString2))"> @(i + 1) </button> </span>
+    }
+
+</div>
+
+
+
+
+
+@code {
+
+    private IList<IncidenceReports> cst = null;
+
+    public int PageSize { get; set; }
+    public int totalPages { get; set; }
+    public string whatisSelected { get; set; }
+
+    public string selectedString;
+    public string selectedString2;
+    public int CurrentPage { get; set; }
+
+    public string toggle;
+
+    public string lat;
+    public string lng;
+
+    public async Task clicktest(string latitude, string longitude)
+    {
+        lat = latitude.ToString();
+        lng = longitude.ToString();
+
+        await Task.Run(ShowModal);
+    }
+
+
+    public void toggleCheck(ChangeEventArgs e)
+    {
+        toggle = e.Value.ToString();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Run(LoadReports);
+    }
+
+    public async Task LoadReports()
+    {
+        PageSize = 10;
+
+        await using (var context = new eedcgisdbContext())
+        {
+
+
+            cst = context.IncidenceReports.Select(p => new IncidenceReports()
+            {
+                IncidenceId = p.IncidenceId,
+                ReporterFullname = p.ReporterFullname,
+                ReporterPhoneNo = p.ReporterPhoneNo,
+                Category = p.Category,
+                Description = p.Description,
+                CapturedIssueDate = p.CapturedIssueDate,
+                LatY = p.LatY,
+                LongX = p.LongX
+
+            }).Take(PageSize).ToList();
+
+            totalPages = (int)Math.Ceiling(context.IncidenceReports.Count() / (decimal)PageSize);
+        }
+    }
+
+
+
+    public async void loadTableInfo()
+    {
+
+        var pageNumber = 0;
+
+        if (selectedString == "None" && selectedString2 == "None")
+        {
+            await Single(pageNumber, selectedString, selectedString2);
+
+            //await Task.Run(LoadReports);
+            //CurrentPage = pageNumber;
+        }
+        else if (selectedString != null && selectedString2 == null || selectedString2 == "None" || selectedString2 == "-- Choose Category --")
+        {
+
+            // Do actions to Filter by Just Category
+            UpdateListSingle(pageNumber, selectedString);
+            CurrentPage = pageNumber;
+        }
+        else if (selectedString2 != null && selectedString == null || selectedString == "None" || selectedString == "-- Choose Category --")
+        {
+            // Do actions to Filter by Just District
+            UpdateListSingle2(pageNumber, selectedString2);
+            CurrentPage = pageNumber;
+        }
+        else
+        {
+            if (selectedString != null && selectedString2 != null)
+            {
+                UpdateListMultiple(pageNumber, selectedString, selectedString2);
+                CurrentPage = pageNumber;
+            }
+
+            else if (selectedString == null && selectedString2 != null)
+            {
+                // Do actions to Filter by Just District
+                CurrentPage = pageNumber;
+            }
+
+            else
+            {
+                ReturnNoRecord(pageNumber, selectedString);
+            }
+        }
+    }
+
+
+
+
+    public void CheckandDo(ChangeEventArgs e)
+    {
+
+        selectedString = e.Value.ToString();
+
+    }
+
+    public void CheckandDo2(ChangeEventArgs e)
+    {
+        selectedString2 = e.Value.ToString();
+
+    }
+
+    public void ReturnNoRecord(int pageNumber, string category)
+    {
+
+        using (var context = new eedcgisdbContext())
+        {
+            cst = context.IncidenceReports.Where(p => p.Category == "notvalid").Skip(pageNumber * PageSize).Take(PageSize).ToList();
+        }
+    }
+
+
+
+    private async Task Single(int pageNumber, string category, string feeder)
+    {
+        await using (var context = new eedcgisdbContext())
+        {
+            if (selectedString == "None" && selectedString2 == "None")
+            {
+                cst = context.IncidenceReports.Skip(pageNumber * PageSize).Take(PageSize).ToList();
+                CurrentPage = pageNumber;
+            }
+
+            else if (selectedString != null && selectedString2 == null || selectedString2 == "None" || selectedString2 == "-- Choose Category --")
+            {
+
+                cst = context.IncidenceReports.Where(p => p.Category == category).Skip(pageNumber * PageSize).Take(PageSize).ToList();
+                CurrentPage = pageNumber;
+            }
+            else if (selectedString2 != null && selectedString == null || selectedString == "None" || selectedString == "-- Choose Category --")
+            {
+
+                cst = context.IncidenceReports.Where(p => p.DistrictName == feeder).Skip(pageNumber * PageSize).Take(PageSize).ToList();
+                CurrentPage = pageNumber;
+            }
+            else
+            {
+
+                if (selectedString != null && selectedString2 != null)
+                {
+
+                    cst = context.IncidenceReports.Where(p => p.Category == category && p.DistrictName == feeder).Skip(pageNumber * PageSize).Take(PageSize).ToList();
+                    CurrentPage = pageNumber;
+                }
+                else
+                {
+                    cst = context.IncidenceReports.Skip(pageNumber * PageSize).Take(PageSize).ToList();
+                    CurrentPage = pageNumber;
+                }
+            }
+
+        }
+    }
+
+
+
+    private void UpdateListSingle(int pageNumber, string category)
+    {
+
+        using (var context = new eedcgisdbContext())
+        {
+            cst = context.IncidenceReports.Where(p => p.Category == category).Skip(pageNumber * PageSize).Take(PageSize).ToList();
+            CurrentPage = pageNumber;
+        }
+    }
+
+    private void UpdateListSingle2(int pageNumber, string district)
+    {
+
+        using (var context = new eedcgisdbContext())
+        {
+            cst = context.IncidenceReports.Where(p => p.DistrictName == district).Skip(pageNumber * PageSize).Take(PageSize).ToList();
+            CurrentPage = pageNumber;
+        }
+    }
+
+
+    private void UpdateListMultiple(int pageNumber, string category, string feeder)
+    {
+
+        using (var context = new eedcgisdbContext())
+        {
+            cst = context.IncidenceReports.Where(p => p.Category == category && p.DistrictName == feeder).Skip(pageNumber * PageSize).Take(PageSize).ToList();
+
+            CurrentPage = pageNumber;
+        }
+    }
+
+
+
+    private void Filterbase(int pageNumber, string category)
+    {
+        using (var context = new eedcgisdbContext())
+        {
+            cst = context.IncidenceReports.Where(p => p.Category == category).Skip(pageNumber * PageSize).Take(PageSize).ToList();
+        }
+    }
+
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+
+    [Parameter] public string PassedLat { get; set; }
+    [Parameter] public string PassedLng { get; set; }
+
+    string _message = "Hello World";
+
+
+    public async Task ShowModal()
+    {
+        var parameters = new ModalParameters();
+
+        parameters.Add(nameof(Googlemap.PassedLat), lat);
+
+        parameters.Add(nameof(Googlemap.PassedLng), lng);
+
+        _ = Modal.Show<Googlemap>("Incidence Map", parameters);
+
+    }
+
+}
